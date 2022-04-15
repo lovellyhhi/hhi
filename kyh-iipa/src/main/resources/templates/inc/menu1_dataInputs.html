@@ -1,0 +1,42 @@
+
+<main>
+	<div class="container-fluid px-4">
+		<h1 class="mt-4">검사 데이터 입력</h1>
+		<ol class="breadcrumb mb-4">
+			<li class="breadcrumb-item active">엑셀 파일을 업로드하세요.</li>
+		</ol>
+		<div class="row">
+
+			<div class="col-xl-3 col-md-6">
+				<form id="form1" name="form1" method="post"
+					enctype="multipart/form-data">
+					<div class="card  mb-4">
+						<div class="card-header bg-success text-white">Excels Upload</div>
+						<div class="card-body" style="height: 250px">
+							<input type="file" id="fileInput" name="fileInput"
+								multiple="multiple" style="height: 100%; width: 100%">
+						</div>
+						<div
+							class="card-footer d-flex align-items-center justify-content-between">
+							<button type="button" class="btn btn-success"
+								onclick="doExcelUploadProcess()">분석</button>
+							<button type="button" class="btn btn-secondary"
+								onclick="doRefresh()">초기화</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div id="result"></div>
+
+		</div>
+	</div>
+</main>
+
+
+<script th:inline="javascript">
+	$(document).ready(function() {
+
+		//_Main.dataRefresh([[${param.pageNo}]]);
+	});
+</script>

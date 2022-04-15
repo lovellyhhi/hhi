@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body th:align="center">
+<p>
+403 <br>
+잘못된 접근입니다.
+</p>  
+  <div layout:fragment="content">
+    <h1>Error Page</h1>
+    error code : <span th:text="${code}"></span>
+    <br>error msg : <span th:text="${msg}"></span>
+    <br>timestamp : <span th:text="${timestamp}"></span>
+  </div>
+
+</body>
+</html>
