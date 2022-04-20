@@ -3,195 +3,192 @@
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Dashboard - SB Admin</title>
-        <link href="/assets/css/styles.css" rel="stylesheet" />
-        <link href="/assets/css/simple-datatables.css" rel="stylesheet" />
-        <link href="/assets/css/dropzone.min.css" rel="stylesheet" />
+        <title>IIPA</title>
         <link rel="icon" href="/assets/img/favicon.png" type="image/x-icon">
         
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/bootstrap-grid.min.css" rel="stylesheet" />
+        <link href="/assets/css/bootstrap-reboot.min.css" rel="stylesheet" />
+        
+        <link href="/assets/css/app.css" rel="stylesheet" />
+        
+        <script src="/assets/js/jquery.3.2.1.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/js/fontawsome.js"></script>
+        
+		<script th:inline="javascript">
+
+		let _IIPA = {
+				datas : []
+		};
+		
+		
+		
+		// 로그아웃
+		  function logout() {
+		    	if(!confirm("종료하시겠습니까?")) return;
+		    	
+		        $.ajax('/logout', {
+		            method: 'POST',
+		            processData: false,
+		            contentType: false,
+		            headers: {
+		                'X-XSRF-TOKEN': '[(${_csrf.token})]'
+		                // 2020-10-07처음로딩 시 메모리에 올려놓은 후 js 호출 처리
+		            },
+		            complete: function () {
+		                window.location.href = '/';
+		            },
+		        });
+		  }
+		  
+		  
+		  
+		  
+		  function getFiles() {
+			  return document.querySelector('#fileInput').files;
+		  }
+		  
+		// 엑셀 리스트 그리기
+		  function getFileList() {
+			  
+			  let files = getFiles();
+			  
+			  let $fileListEl = $("#fileList");
+	          $fileListEl.empty();
+	          
+	          let tmpl = '<ul>';
+	          
+	          for (let i = 0; i < files.length; i++)
+	          {
+	              tmpl += `<li>${files[i].name}</li>`
+	          }
+	          
+	          tmpl += '</ul>';
+	          $fileListEl.append(tmpl);
+		  } 
+		  
+		  
+		  
+		  // 버튼액션
+          function doBtnAction() {
+			let $fileInput = $("#fileInput");
+			
+			// 활성화여부
+			let isActive = !$fileInput.prop('disabled');
+			let files = getFiles();
+			
+			// 버튼이 활성화 되어있으면 업로드, 아니면 초기화 
+			if(isActive){
+				// 업로드
+				if(files.length>0){
+					doExcelUploadProcess();
+				}else{
+					alert('파일이 없습니다.');
+					return;
+				}
+				
+			}else{
+				//초기화
+				doRefresh();
+			}
+		  }
+		  
+		  //버튼상태
+		  function setBtnStatus(isActive){
+			  let isDisabled = !isActive ;
+			  let btnTxt = isActive?'분석':'초기화';
+			  let clazz = isActive?'btn-success':'btn-dark';
+				  
+			  $("#fileInput").prop('disabled', isDisabled);
+			  let $btnAction = $("#btnAction");
+			  
+			  $btnAction.text(btnTxt);
+			  $btnAction.removeClass('btn-success');
+			  $btnAction.removeClass('btn-dark');
+			  $btnAction.addClass(clazz);
+		  }
+		  
+		  // 초기화 
+		  function doRefresh(){
+			  $("#fileInput").val('');
+			  $("#fileList").empty();
+			  
+			  setBtnStatus(true);
+		  }
+          
+		
+		  // 엑셀업로드
+		    function doExcelUploadProcess() {
+		        var f = new FormData(document.getElementById('form1'));
+		        $.ajax({
+		          url: "/excelReader",
+		          data: f,
+		          processData: false,
+		          contentType: false,
+		          headers: {
+		            'X-XSRF-TOKEN': '[(${_csrf.token})]'
+		            // 2020-10-07처음로딩 시 메모리에 올려놓은 후 js 호출 처리
+		          },
+		          type: "POST",
+		          success: function (data) {
+		        	  _IIPA.datas = data.data;
+		        	  
+		        	  
+		        	  
+		        	  debugger;
+		            setBtnStatus(false);
+		            //document.getElementById('result').innerHTML = JSON.stringify(data);
+		          }
+		        });
+		      }
+		    
+		  
+		  
+		</script>
         
     </head>
-    <body class="sb-nav-fixed">
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="/">자주 검사 전산 자동화</a>
-            <!-- Sidebar Toggle-->
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-            <!-- Navbar Search-->
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                </div>
-            </form>
-        </nav>
-        <div id="layoutSidenav">
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            <div class="sb-sidenav-menu-heading">MENU</div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                                <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                                메뉴
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse show" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="javascript:void(0);" onclick="callPage('menu1_dataInputs',1)"><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>검사데이터입력</a>
-                                    <a class="nav-link" href="javascript:void(0);" onclick="callPage('menu2_result',2)"><div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>검사결과</a>
-                                    <a class="nav-link" href="javascript:void(0);" onclick="callPage('menu3_analysis',3)"><div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>결과분석</a>
-                                </nav>
-                            </div>
-                            <div class="sb-sidenav-menu-heading">Logout</div>
-                            <a class="nav-link" href="#!" id="btnLogout">
-                                <div class="sb-nav-link-icon"><i class="fas fa-sign-out"></i></div>
-                                종료
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sb-sidenav-footer">
-                        <div class="small"></div>
-                    </div>
-                </nav>
+    <body >
+    <div class="layout-full h100p">
+        <header class="bg-dark">
+	        <nav class="sb-topnav navbar navbar-expand navbar-dark ">
+	            <!-- Navbar Brand-->
+	            <a class="navbar-brand ps-3" href="/">자주 검사 전산 자동화</a>
+	            <button class="btn btn-dark" id="btnLogout" type="button" onclick="logout()"><i class="fas fa-sign-out"></i>종료</button>
+	        </nav>
+        </header>
+        <div class="row w100p" style="height: calc(100% - 60px)">
+            <div class="col-md-2  bg-dark  d-flex-column">
+                
+                <div class="pt-3 nav flex-column nav-pills " id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                   <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">데이터입력</a>
+                   <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">검사결과</a>
+                   <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">결과분석</a>
+                 </div>
+            
             </div>
-            <div id="layoutSidenav_content" >
+            <div class="col-md-10">
+            
+	              <div class="tab-content" id="v-pills-tabContent">
+		              <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+		                 <th:block th:replace="inc/contents::contents_1"></th:block>
+		              </div>
+		              <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+		                  <th:block th:replace="inc/contents::contents_2"></th:block>
+		              </div>
+		              <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+		                  <th:block th:replace="inc/contents::contents_3"></th:block>
+		              </div>
+	               </div>
+	               
             </div>
-        </div>
-        <script src="/assets/js/jquery.3.2.1.min.js"></script>
-        <script src="/assets/js/fontawsome.js"></script>
-        <script src="/assets/js/bootstrap.bundle.min.js"></script>
-        <script src="/assets/js/scripts.js"></script>
-        <script src="/assets/js/Chart.min.js"></script>
-        <script src="/assets/js/simple-datatables@latest.js"></script>
-        <script src="/assets/js/datatables-simple-demo.js"></script>
-        <script src="/assets/js/dropzone.min.js"></script>
+         </div>
+
+        <footer></footer>
+    </div>
     </body>
-    
-
-<script th:inline="javascript">
-
-
-	function logout() {
-		$.ajax('/logout', {
-			method: 'POST',
-			processData: false,
-			contentType: false,
-			headers: {
-				'X-XSRF-TOKEN': '[(${_csrf.token})]'
-				// 2020-10-07처음로딩 시 메모리에 올려놓은 후 js 호출 처리
-			},
-			complete: function () {
-				window.location.href = '/';
-			},
-		});
-	}
-
-
-	function doExcelUploadProcess() {
-	    var f = new FormData(document.getElementById('form1'));
-	    $.ajax({
-	      url: "/excelReader",
-	      data: f,
-	      processData: false,
-	      contentType: false,
-	      headers: {
-	        'X-XSRF-TOKEN': '[(${_csrf.token})]'
-	        // 2020-10-07처음로딩 시 메모리에 올려놓은 후 js 호출 처리
-	      },
-	      type: "POST",
-	      success: function (data) {
-	        document.getElementById('result').innerHTML = JSON.stringify(data);
-	      }
-	    });
-	  }
-	
-	
-	// 초기화
-	function doRefresh() {
-	    $("#fileInput").val("");
-	    doExcelUploadProcess();
-	}
-		
-	
-	
-
-  function callPage(page,no) {
-    $.ajax({
-      url: `/inc/${page}`,
-      data: {pageNo:no},
-      headers: {
-        'X-XSRF-TOKEN': '[(${_csrf.token})]'
-        // 2020-10-07처음로딩 시 메모리에 올려놓은 후 js 호출 처리
-      },
-      type: "POST",
-      success: function (data) {
-        $("#layoutSidenav_content").empty().append($(data));
-      }
-    });
-    
-  }
-
-  function callApiData(page) {
-    $.ajax({
-      url: `/inc/${page}`,
-      data: {},
-      async: true,
-      global: true,
-      contentType: "application/json",
-      dataType: "json",
-      headers: {
-        'X-XSRF-TOKEN': '[(${_csrf.token})]'
-        // 2020-10-07처음로딩 시 메모리에 올려놓은 후 js 호출 처리
-      },
-      type: "POST",
-      success: function (data) {
-        debugger;
-      }
-    });
-  }
-  
-  
-  $( document ).ready(function() {
-    
-    $("div.collapse .nav-link").on('click',function(e){
-      e.stopPropagation();
-      $(".nav-link").removeClass('active');
-      $(this).addClass('active');
-      
-    });
-    
-    $("#btnLogout").on('click',function(e){
-      e.stopPropagation();
-      if(!confirm("종료하시겠습니까?")) return;
-      logout();
-    });
-    
-    $("div.collapse .nav-link")[0].click();
-    
-    
-//     $(document).on('click', function(e){
-//         event.preventDefault();
-//         if(!document.body.classList.contains('sb-sidenav-toggled')){
-// 	        document.body.classList.toggle('sb-sidenav-toggled');
-//         }
-//         document.body.classList.toggle('sb-sidenav-toggled');
-        
-//     });
-    
-  });
-  
-  
-  
-  var _Main = {};
-  _Main.dataRefresh = (no)=>{
-  }
-
-
-
-</script>
-
-    
-    
 </html>
