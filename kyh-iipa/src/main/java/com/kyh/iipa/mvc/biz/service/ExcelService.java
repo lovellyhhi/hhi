@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -22,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExcelService {
 
-	public List<List<String>> excelReader(MultipartFile excelFile) {
+	public Map<String,Object> excelReader(MultipartFile excelFile) {
 		List<List<String>> list = new ArrayList<List<String>>();
 
 		InputStreamReader isr = null;
@@ -61,8 +63,12 @@ public class ExcelService {
 				}
 			}
 		}
+		
+		Map<String,Object> rtn = new HashMap<>();
+		rtn.put("fileNm", excelFile.getOriginalFilename());
+		rtn.put("datas", list);
 
-		return list;
+		return rtn;
 
 	}
 

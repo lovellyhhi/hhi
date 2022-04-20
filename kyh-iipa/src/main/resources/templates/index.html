@@ -136,17 +136,19 @@
 		          },
 		          type: "POST",
 		          success: function (data) {
-		        	  _IIPA.datas = data.data;
-		        	  
-		        	  
-		        	  
-		        	  debugger;
+		        	_IIPA.datas = data.data;
 		            setBtnStatus(false);
-		            //document.getElementById('result').innerHTML = JSON.stringify(data);
+		            setDataTables();
+		            
 		          }
 		        });
 		      }
 		    
+		  // 검사결과 데이터 입력
+		  function setDataTables(){
+			  
+		  
+		  }
 		  
 		  
 		</script>

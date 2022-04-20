@@ -3,6 +3,7 @@ package com.kyh.iipa.mvc.controller;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,11 +30,11 @@ public class ExcelController {
 		
 		List<MultipartFile> uploadFileList = request.getFiles("fileInput");
 		
-		List<List<List<String>>> rtn = new ArrayList();
+		List<Map<String,Object>> rtn = new ArrayList();
 		
 		uploadFileList.stream().forEach(file->{
 			
-			List<List<String>> fileInfo = excelService.excelReader(file);
+			Map<String,Object> fileInfo = excelService.excelReader(file);
 			rtn.add(fileInfo);
 		});
 		
